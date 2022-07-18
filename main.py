@@ -1,21 +1,23 @@
 import discord
 import os
 
-intents = discord.Intents.default()
-intents.message_content = True
+bot = discord.Bot()
 
-client = discord.Client( intents = intents )
+GUILD_IDS = [
+	int( os.environ[ "GUILD_ID" ] )
+]
 
-@client.event
+@bot.event
 async def on_ready():
-	print( f'We have logged in as {client.user}' )
+	print( f'We have logged in as {bot.user}' )
 
-@client.event
+@bot.event
 async def on_message( message ):
-	if message.author == client.user:
+	if message.author == bot.user:
 		return
 
-	if message.content.lower() == '!bot' :
-		await message.channel.send( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' )
+@bot.slash_command( name = "about" , description = "Shows an About Me message." , guild_ids = GUILD_IDS )
+async def about( ctx ):
+	await ctx.respond( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' )
 
-client.run( os.environ[ "API_KEY" ] )
+bot.run( os.environ[ "API_KEY" ] )
