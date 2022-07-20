@@ -5,16 +5,19 @@ from dotenv import load_dotenv
 intents = discord.Intents.default()
 intents.message_content = True
 
-# client = discord.Client( intents = intents )
-bot = discord.Bot(debug_guilds = [997949327974604911])
+client = discord.Client( intents = intents )
 
-@bot.event
+@client.event
 async def on_ready():
-	print( f'We have logged in as {bot.user}' )
+	print( f'We have logged in as {client.user}' )
 
-@bot.slash_command(name = "bot")
-async def bot_command(ctx):
-	await ctx.respond( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' )
+@client.event
+async def on_message( message ):
+	if message.author == client.user:
+		return
+
+	if message.content.lower() == '!bot' :
+		await message.channel.send( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' )
 
 key = ""
 if "API_KEY" in dict(os.environ):
@@ -23,4 +26,4 @@ else:
 	load_dotenv()
 	key = os.getenv("API_KEY")
 
-bot.run( key )
+client.run( key )
