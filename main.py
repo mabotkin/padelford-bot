@@ -3,8 +3,11 @@ import random
 import os
 from dotenv import load_dotenv
 
+intents = discord.Intents.default()
+intents.message_content = True
+
 load_dotenv()
-bot = discord.Bot()
+bot = discord.Bot(intents = intents)
 
 GUILD_IDS = [
 	int( os.environ[ "GUILD_ID" ] )
@@ -25,6 +28,9 @@ async def on_message( message ):
 	if message.author.id == USER_IDS[ "Sean" ] :
 		if random.random() < 0.05:
 			await message.reply( "That is a good point!" )
+	if "ism" in message.content.lower():
+		emoji = "💩"
+		await message.add_reaction(emoji)
 
 
 @bot.slash_command( name = "about" , description = "Shows an About Me message." , guild_ids = GUILD_IDS )
