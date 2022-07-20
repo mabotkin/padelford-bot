@@ -1,5 +1,6 @@
 import discord
 import os
+from dotenv import load_dotenv
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -18,4 +19,11 @@ async def on_message( message ):
 	if message.content.lower() == '!bot' :
 		await message.channel.send( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' )
 
-client.run( os.environ[ "API_KEY" ] )
+key = ""
+if "API_KEY" in dict(os.environ):
+	key = os.environ(["API_KEY"])
+else:
+	load_dotenv()
+	key = os.getenv("API_KEY")
+
+client.run( key )
