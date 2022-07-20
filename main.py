@@ -43,4 +43,11 @@ async def add_role( ctx, *, role: discord.Role):
 	await member.add_roles(role)
 	await ctx.respond(f'Added role {role} to {member.mention}')
 
+@bot.slash_command( name = "getmath" , description = "Gives you the \"math\" role, which allows you to add interest roles." , guild_ids = GUILD_IDS )
+async def interest_role( ctx ):
+	member = ctx.author
+	role = discord.utils.get( ctx.guild.roles , name = "math" )
+	await member.add_roles( role )
+	await ctx.respond( f"Gave math role to { member.mention }." )
+
 bot.run( os.getenv("API_KEY") )
