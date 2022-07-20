@@ -1,7 +1,9 @@
 import discord
 import random
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 bot = discord.Bot()
 
 GUILD_IDS = [
@@ -29,4 +31,10 @@ async def on_message( message ):
 async def about( ctx ):
 	await ctx.respond( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' )
 
-bot.run( os.environ[ "API_KEY" ] )
+@bot.command( name = "add_role", description = "Give yourself a fun new identity.", guild_ids = GUILD_IDS)
+async def add_role( ctx, *, role: discord.Role):
+	member = ctx.author
+	await member.add_roles(role)
+	await ctx.respond(f'Added role {role} to {member.mention}')
+
+bot.run( os.getenv("API_KEY") )
