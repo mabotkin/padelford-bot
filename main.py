@@ -1,4 +1,5 @@
 import discord
+from discord import option
 import random
 import os
 from dotenv import load_dotenv
@@ -10,7 +11,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 load_dotenv()
-bot = discord.Bot(intents = intents)
+bot = discord.Bot( intents = intents )
 
 # connect gsheets
 scopes = [ 'https://spreadsheets.google.com/feeds' ]
@@ -64,8 +65,13 @@ async def interest_role( ctx ):
 	await ctx.respond( f"Gave math role to { member.mention }." )
 
 @bot.slash_command( name = "faq" , description = "Displays FAQ messages." , guild_ids = GUILD_IDS )
-async def faq( ctx ):
+@option( "searchterm" , descrption = "Enter a search term to filter FAQ messages." , default = "" )
+async def faq( ctx , searchterm : str ):
 	sheet = spreadsheet.worksheet( "FAQ" )
-	await ctx.respond( str( sheet.get_all_records() ) )
+	faqs = sheet.col_values( 1 )
+	if searchterm != "":
+		faqs = [ x for x in faqs if searchterm in x ]
+	reply = "\n".join( [ "`" + x + "`" for x in faqs ] )
+	await ctx.respond( reply )
 
-bot.run( os.getenv("API_KEY") )
+bot.run( os.getenv( "API_KEY" ) )
