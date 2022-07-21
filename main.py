@@ -1,11 +1,13 @@
 import discord
 from discord import option
+from discord.ext import tasks
 import random
 import os
 from dotenv import load_dotenv
 import gspread
 import json
 from oauth2client.service_account import ServiceAccountCredentials
+from datetime import time, timezone
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -33,6 +35,7 @@ USER_IDS = {
 
 @bot.event
 async def on_ready():
+	birthday.start()
 	print( f'We have logged in as {bot.user}' )
 
 @bot.event
@@ -73,5 +76,10 @@ async def faq( ctx , searchterm : str ):
 		faqs = [ x for x in faqs if searchterm in x ]
 	reply = "\n".join( [ "`" + x + "`" for x in faqs ] )
 	await ctx.respond( reply )
+
+@tasks.loop( time = time( 7 , 0 , tzinfo = timezone.utc ) )
+async def birthday():
+	channel = bot.get_channel( 999192176514838600 ) # this is the testing channel on dev server
+	await channel.send( "Happy Birthday Albert!" )
 
 bot.run( os.getenv( "API_KEY" ) )
