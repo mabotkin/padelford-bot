@@ -16,6 +16,24 @@ intents.message_content = True
 load_dotenv()
 bot = discord.Bot( intents = intents )
 
+# interests
+interests = [
+	"combinatorics" ,
+	"algebra" ,
+	"noncommutative algebra" ,
+	"algebraic geometry" ,
+	"algebraic topology" ,
+	"analysis" ,
+	"geometric measure theory" ,
+	"real analysis" ,
+	"complex analysis" ,
+	"dynamics" ,
+	"differential geometry" ,
+	"homotopy theory" ,
+	"number theory" ,
+	"theoretical computer science" ,
+]
+
 # connect gsheets
 scopes = [ 'https://spreadsheets.google.com/feeds' ]
 json_creds = os.getenv( "GOOGLE_SHEETS_CREDS_JSON" )
@@ -55,26 +73,51 @@ async def on_message( message ):
 async def about( ctx ):
 	await ctx.respond( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' )
 
-@bot.slash_command( name = "gradstudent" , description = "Gives you the \"grad-student\" role, which allows you to add interest roles." , guild_ids = GUILD_IDS )
-async def interest_role( ctx ):
-	member = ctx.author
-	role = discord.utils.get( ctx.guild.roles , name = "grad-student" )
-	await member.add_roles( role )
-	await ctx.respond( f"Gave `grad-student` role to { member.mention }." )
+class RoleSelectView( discord.ui.View ):
+	@discord.ui.select(
+		placeholder = "Choose your interests!" ,
+		min_values = 1 ,
+		max_values = len( interests ) ,
+		options = [
+			discord.SelectOption( label = role ) for role in interests
+		]
+	)
+	async def select_callback( self , select , interaction ):
+		member = interaction.user
+		response_text = "Adding roles: " + ( ", ".join( [ "\"" + x + "\"" for x in select.values ] ) ) + "...";
+		await interaction.response.edit_message( content = response_text , view = None )
+		# remove all interest roles first
+		remove_roles = []
+		for role_name in interests:
+			remove_roles.append( discord.utils.get( interaction.guild.roles , name = role_name ) )
+		await member.remove_roles( *remove_roles )
+		# add back new roles
+		add_roles = []
+		for role_name in select.values:
+			add_roles.append( discord.utils.get( interaction.guild.roles , name = role_name ) )
+		await member.add_roles( *add_roles )
+
+@bot.slash_command( name = "getrole" , description = "Select your interest roles." , guild_ids = GUILD_IDS )
+async def get_roles( ctx ):
+	await ctx.respond( view = RoleSelectView( timeout = None ) , ephemeral = True )
+
+class FAQView( discord.ui.View ):
+	def __init__( self ):
+		super().__init__()
+		button = discord.ui.Button( label = "FAQ" , style = discord.ButtonStyle.link , url = "https://docs.google.com/document/d/1TQtQ48WrYaHLAe3eruJi7blMlKQfbu8_a6hWHr2UhrQ/edit" )
+		self.add_item( button )
 
 @bot.slash_command( name = "faq" , description = "Displays the FAQ document." , guild_ids = GUILD_IDS )
 async def faq( ctx ):
-	body = discord.Embed( title = "FAQ" , description = "A link to the frequently asked questions document." , color = 0x0000ff )
-	body.add_field( name = "URL" , value = "https://docs.google.com/document/d/1TQtQ48WrYaHLAe3eruJi7blMlKQfbu8_a6hWHr2UhrQ/edit" )
-	await ctx.respond( embed = body )
+	await ctx.respond( view = FAQView() , ephemeral = True )
 
-@bot.slash_command( name = "set_birthday", description = "Tell us your birthday!")
+@bot.slash_command( name = "setbirthday", description = "Tell us your birthday!")
 async def set_birthday( ctx, *, month: int, day: int):
 	try:
 		bday = datetime.date(2000, month, day) # hardcode 2000 because it's a leap year, just in case
-		await ctx.respond(f'Setting {ctx.author.mention}\'s birthday to {month}/{day}.')
+		await ctx.respond(f'Setting {ctx.author.mention}\'s birthday to {month}/{day}.' , ephemeral = True )
 	except ValueError:
-		await ctx.respond('Please provide a valid date.')
+		await ctx.respond('Please provide a valid date.' , ephemeral = True )
 	else:
 		sheet = spreadsheet.worksheet("Birthdays")
 		cur_cell = sheet.find(ctx.author.name, in_column=1)
@@ -85,7 +128,7 @@ async def set_birthday( ctx, *, month: int, day: int):
 			sheet.update_cell(cur_cell.row, 3, month)
 			sheet.update_cell(cur_cell.row, 4, day)
 
-@bot.slash_command( name = "upcoming_bdays", description = "Start planning your parties now.")
+@bot.slash_command( name = "birthdays", description = "Start planning your parties now.")
 async def upcoming_bdays(ctx):
 	days_in_advance = 7
 	today = datetime.date.today()
