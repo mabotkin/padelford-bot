@@ -62,15 +62,11 @@ async def interest_role( ctx ):
 	await member.add_roles( role )
 	await ctx.respond( f"Gave `grad-student` role to { member.mention }." )
 
-@bot.slash_command( name = "faq" , description = "Displays FAQ messages." , guild_ids = GUILD_IDS )
-@option( "searchterm" , descrption = "Enter a search term to filter FAQ messages." , default = "" )
-async def faq( ctx , searchterm : str ):
-	sheet = spreadsheet.worksheet( "FAQ" )
-	faqs = sheet.col_values( 1 )
-	if searchterm != "":
-		faqs = [ x for x in faqs if searchterm in x ]
-	reply = "\n".join( [ "`" + x + "`" for x in faqs ] )
-	await ctx.respond( reply )
+@bot.slash_command( name = "faq" , description = "Displays the FAQ document." , guild_ids = GUILD_IDS )
+async def faq( ctx ):
+	body = discord.Embed( title = "FAQ" , description = "A link to the frequently asked questions document." , color = 0x0000ff )
+	body.add_field( name = "URL" , value = "https://docs.google.com/document/d/1TQtQ48WrYaHLAe3eruJi7blMlKQfbu8_a6hWHr2UhrQ/edit" )
+	await ctx.respond( embed = body )
 
 @bot.slash_command( name = "set_birthday", description = "Tell us your birthday!")
 async def set_birthday( ctx, *, month: int, day: int):
@@ -120,7 +116,7 @@ async def birthday():
 		row["userid"] for row in spreadsheet.worksheet("Birthdays").get_all_records()
 		if row["month"] == today_month and row["day"] == today_day
 	]
-	is_alberts_birthday = !( today_month == 5 && today_day == 27 )
+	is_alberts_birthday = not ( today_month == 5 and today_day == 27 )
 	if is_alberts_birthday:
 		if len(birthday_people) == 0:
 			await channel.send( "Happy Birthday Albert!" )
