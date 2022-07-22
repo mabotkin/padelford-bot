@@ -119,7 +119,20 @@ async def faq( ctx , searchterm : str ):
 
 @tasks.loop( time = time( 7 , 0 , tzinfo = timezone.utc ) )
 async def birthday():
-	channel = bot.get_channel( 999192176514838600 ) # this is the testing channel on dev server
-	await channel.send( "Happy Birthday Albert!" )
+	channel = discord.utils.get(bot.get_all_channels(), name="general")
+	today = datetime.date.today()
+	today_month = today.month
+	today_day = today.day
+	birthday_people = [
+		row["userid"] for row in spreadsheet.worksheet("Birthdays").get_all_records()
+		if row["month"] == today_month and row["day"] == today_day
+	]
+	if len(birthday_people) == 0:
+		await channel.send( "Happy Birthday Albert!" )
+	elif len(birthday_people) == 1:
+		await channel.send(f'Happy Birthday <@{birthday_people[0]}> and Albert!')
+	else:
+		all_mentions = [f'<@{person}>' for person in birthday_people]
+		await channel.send("Happy Birthday " + ', '.join(all_mentions) + ", and Albert!")
 
 bot.run( os.getenv( "API_KEY" ) )
