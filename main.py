@@ -167,7 +167,7 @@ async def birthday():
 	is_alberts_birthday = not ( today_month == 5 and today_day == 27 )
 	if is_alberts_birthday:
 		if len(birthday_people) == 0:
-			await channel.send( "Happy Birthday Albert!" )
+			pass
 		elif len(birthday_people) == 1:
 			await channel.send(f'Happy Birthday <@{birthday_people[0]}> and Albert!')
 		else:
