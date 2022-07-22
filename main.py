@@ -127,7 +127,7 @@ async def set_birthday( ctx, *, month: int, day: int):
 		sheet = spreadsheet.worksheet("Birthdays")
 		cur_cell = sheet.find(ctx.author.name, in_column=1)
 		if cur_cell == None:
-			sheet.append_row([ctx.author.name, ctx.author.id, month, day])
+			sheet.append_row([ctx.author.name, str(ctx.author.id), month, day])
 		else:
 			sheet.update_cell(cur_cell.row, 2, str(ctx.author.id))
 			sheet.update_cell(cur_cell.row, 3, month)
