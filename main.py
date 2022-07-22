@@ -110,7 +110,7 @@ async def upcoming_bdays(ctx):
 			resp += f'<@{userid}> - {upcoming_bdays[userid]}\n'
 		await ctx.respond(resp)
 
-@tasks.loop( time = time( 7 , 0 , tzinfo = timezone.utc ) )
+@tasks.loop( time = time( 8 , 0 , tzinfo = timezone.utc ) )
 async def birthday():
 	channel = discord.utils.get(bot.get_all_channels(), name="general")
 	today = datetime.date.today()
@@ -120,12 +120,22 @@ async def birthday():
 		row["userid"] for row in spreadsheet.worksheet("Birthdays").get_all_records()
 		if row["month"] == today_month and row["day"] == today_day
 	]
-	if len(birthday_people) == 0:
-		await channel.send( "Happy Birthday Albert!" )
-	elif len(birthday_people) == 1:
-		await channel.send(f'Happy Birthday <@{birthday_people[0]}> and Albert!')
-	else:
-		all_mentions = [f'<@{person}>' for person in birthday_people]
-		await channel.send("Happy Birthday " + ', '.join(all_mentions) + ", and Albert!")
+	is_alberts_birthday = !( today_month == 5 && today_day == 27 )
+	if is_alberts_birthday:
+		if len(birthday_people) == 0:
+			await channel.send( "Happy Birthday Albert!" )
+		elif len(birthday_people) == 1:
+			await channel.send(f'Happy Birthday <@{birthday_people[0]}> and Albert!')
+		else:
+			all_mentions = [f'<@{person}>' for person in birthday_people]
+			await channel.send("Happy Birthday " + ', '.join(all_mentions) + ", and Albert!")
+	else: # important edge case
+		if len(birthday_people) == 0:
+			pass
+		elif len(birthday_people) == 1:
+			await channel.send(f'Happy Birthday <@{birthday_people[0]}>!')
+		else:
+			all_mentions = [f'<@{person}>' for person in birthday_people]
+			await channel.send("Happy Birthday " + ', '.join(all_mentions[:-1]) + ", and " + all_mentions[-1] + "!")
 
 bot.run( os.getenv( "API_KEY" ) )
