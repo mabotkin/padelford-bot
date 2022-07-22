@@ -72,10 +72,32 @@ async def set_birthday( ctx, *, month: int, day: int):
 		sheet = spreadsheet.worksheet("Birthdays")
 		cur_cell = sheet.find(ctx.author.name, in_column=1)
 		if cur_cell == None:
-			sheet.append_row([ctx.author.name, month, day])
+			sheet.append_row([ctx.author.name, ctx.author.id, month, day])
 		else:
-			sheet.update_cell(cur_cell.row, 2, month)
-			sheet.update_cell(cur_cell.row, 3, day)
+			sheet.update_cell(cur_cell.row, 2, str(ctx.author.id))
+			sheet.update_cell(cur_cell.row, 3, month)
+			sheet.update_cell(cur_cell.row, 4, day)
+
+@bot.slash_command( name = "upcoming_bdays", description = "Start planning your parties now.")
+async def upcoming_bdays(ctx):
+	days_in_advance = 7
+	today = datetime.date.today()
+	next_dates = [today + datetime.timedelta(days = i) for i in range(days_in_advance)]
+	next_dates_no_year = [(d.month, d.day) for d in next_dates]
+
+	sheet = spreadsheet.worksheet("Birthdays")
+	all_bdays = sheet.get_all_records()
+	upcoming_bdays = {
+		row['userid'] : str(row['month']) + "/" + str(row['day'])
+		for row in all_bdays if (row['month'], row['day']) in next_dates_no_year
+	}
+	if not upcoming_bdays:
+		await ctx.respond(f'No birthdays in the next week :/')
+	else:
+		resp = "Birthdays in the next week:\n"
+		for userid in upcoming_bdays:
+			resp += f'<@{userid}> - {upcoming_bdays[userid]}\n'
+		await ctx.respond(resp)
 
 
 @bot.slash_command( name = "getmath" , description = "Gives you the \"math\" role, which allows you to add interest roles." , guild_ids = GUILD_IDS )
