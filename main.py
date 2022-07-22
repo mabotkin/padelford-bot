@@ -1,3 +1,4 @@
+import datetime
 import discord
 from discord import option
 from discord.ext import tasks
@@ -59,6 +60,15 @@ async def add_role( ctx, *, role: discord.Role):
 	member = ctx.author
 	await member.add_roles(role)
 	await ctx.respond(f'Added role {role} to {member.mention}')
+
+@bot.slash_command( name = "set_birthday", description = "Tell us your birthday!")
+async def set_birthday( ctx, *, month: int, day: int):
+	try:
+		bday = datetime.date(2000, month, day) # hardcode 2000 because it's a leap year, just in case
+		await ctx.respond(f'Setting {ctx.author.mention}\'s birthday to {month}/{day}')
+	except ValueError:
+		await ctx.respond('Please provide a valid date.')
+
 
 @bot.slash_command( name = "getmath" , description = "Gives you the \"math\" role, which allows you to add interest roles." , guild_ids = GUILD_IDS )
 async def interest_role( ctx ):
