@@ -68,10 +68,15 @@ async def on_message( message ):
 		emoji = "💩"
 		await message.add_reaction(emoji)
 
+class ContributeView( discord.ui.View ):
+	def __init__( self ):
+		super().__init__()
+		button = discord.ui.Button( label = "Github" , style = discord.ButtonStyle.link , url = "https://github.com/mabotkin/padelford-bot" )
+		self.add_item( button )
 
 @bot.slash_command( name = "about" , description = "Shows an About Me message." , guild_ids = GUILD_IDS )
 async def about( ctx ):
-	await ctx.respond( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' )
+	await ctx.respond( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' , view = ContributeView() )
 
 class RoleSelectView( discord.ui.View ):
 	@discord.ui.select(
