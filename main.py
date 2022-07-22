@@ -31,7 +31,8 @@ GUILD_IDS = [
 ]
 
 USER_IDS = {
-	"Sean" : 741470146706800660
+	"Jackson" : 358271740285026306 ,
+	"Sean" : 741470146706800660 ,
 }
 
 @bot.event
@@ -46,6 +47,10 @@ async def on_message( message ):
 	if message.author.id == USER_IDS[ "Sean" ] :
 		if random.random() < 0.05:
 			await message.reply( "That is a good point!" )
+	if message.author.id == USER_IDS[ "Jackson" ] :
+		if random.random() < 0.05:
+			reply = "".join( [ ( x.lower() if ( i % 2 == 0 ) else x.upper() ) for i , x in enumerate( message.content.lower() ) ] )
+			await message.reply( reply )
 	if "ism" in message.content.lower():
 		emoji = "💩"
 		await message.add_reaction(emoji)
