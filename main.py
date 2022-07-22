@@ -68,6 +68,14 @@ async def set_birthday( ctx, *, month: int, day: int):
 		await ctx.respond(f'Setting {ctx.author.mention}\'s birthday to {month}/{day}')
 	except ValueError:
 		await ctx.respond('Please provide a valid date.')
+	else:
+		sheet = spreadsheet.worksheet("Birthdays")
+		cur_cell = sheet.find(ctx.author.name, in_column=1)
+		if cur_cell == None:
+			sheet.append_row([ctx.author.name, month, day])
+		else:
+			sheet.update_cell(cur_cell.row, 2, month)
+			sheet.update_cell(cur_cell.row, 3, day)
 
 
 @bot.slash_command( name = "getmath" , description = "Gives you the \"math\" role, which allows you to add interest roles." , guild_ids = GUILD_IDS )
