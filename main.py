@@ -55,17 +55,28 @@ async def on_message( message ):
 async def about( ctx ):
 	await ctx.respond( 'Hello! I am a friendly bot here to help facilitate activities on the In-Came Autumn 2021 Math Grad Students Discord Server.  Any resemblance to Jackson Morris is purely coincidental.' )
 
-@bot.slash_command( name = "add_role", description = "Give yourself a fun new identity.", guild_ids = GUILD_IDS)
-async def add_role( ctx, *, role: discord.Role):
+@bot.slash_command( name = "gradstudent" , description = "Gives you the \"grad-student\" role, which allows you to add interest roles." , guild_ids = GUILD_IDS )
+async def interest_role( ctx ):
 	member = ctx.author
-	await member.add_roles(role)
-	await ctx.respond(f'Added role {role} to {member.mention}')
+	role = discord.utils.get( ctx.guild.roles , name = "grad-student" )
+	await member.add_roles( role )
+	await ctx.respond( f"Gave `grad-student` role to { member.mention }." )
+
+@bot.slash_command( name = "faq" , description = "Displays FAQ messages." , guild_ids = GUILD_IDS )
+@option( "searchterm" , descrption = "Enter a search term to filter FAQ messages." , default = "" )
+async def faq( ctx , searchterm : str ):
+	sheet = spreadsheet.worksheet( "FAQ" )
+	faqs = sheet.col_values( 1 )
+	if searchterm != "":
+		faqs = [ x for x in faqs if searchterm in x ]
+	reply = "\n".join( [ "`" + x + "`" for x in faqs ] )
+	await ctx.respond( reply )
 
 @bot.slash_command( name = "set_birthday", description = "Tell us your birthday!")
 async def set_birthday( ctx, *, month: int, day: int):
 	try:
 		bday = datetime.date(2000, month, day) # hardcode 2000 because it's a leap year, just in case
-		await ctx.respond(f'Setting {ctx.author.mention}\'s birthday to {month}/{day}')
+		await ctx.respond(f'Setting {ctx.author.mention}\'s birthday to {month}/{day}.')
 	except ValueError:
 		await ctx.respond('Please provide a valid date.')
 	else:
@@ -98,24 +109,6 @@ async def upcoming_bdays(ctx):
 		for userid in upcoming_bdays:
 			resp += f'<@{userid}> - {upcoming_bdays[userid]}\n'
 		await ctx.respond(resp)
-
-
-@bot.slash_command( name = "getmath" , description = "Gives you the \"math\" role, which allows you to add interest roles." , guild_ids = GUILD_IDS )
-async def interest_role( ctx ):
-	member = ctx.author
-	role = discord.utils.get( ctx.guild.roles , name = "math" )
-	await member.add_roles( role )
-	await ctx.respond( f"Gave math role to { member.mention }." )
-
-@bot.slash_command( name = "faq" , description = "Displays FAQ messages." , guild_ids = GUILD_IDS )
-@option( "searchterm" , descrption = "Enter a search term to filter FAQ messages." , default = "" )
-async def faq( ctx , searchterm : str ):
-	sheet = spreadsheet.worksheet( "FAQ" )
-	faqs = sheet.col_values( 1 )
-	if searchterm != "":
-		faqs = [ x for x in faqs if searchterm in x ]
-	reply = "\n".join( [ "`" + x + "`" for x in faqs ] )
-	await ctx.respond( reply )
 
 @tasks.loop( time = time( 7 , 0 , tzinfo = timezone.utc ) )
 async def birthday():
