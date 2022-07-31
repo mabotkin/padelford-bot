@@ -54,6 +54,14 @@ async def on_message( message ):
 	if "ism" in message.content.lower():
 		emoji = "💩"
 		await message.add_reaction(emoji)
+	if "rapl" in message.content.lower():
+		await message.reply( "Hey there! I see you've mentioned \"RAPL\", a mnemonic to remember that Right Adjoints Preserve Limits.  Here is a better way of remembering this fact, courtesy of Jarod Alper." , view = RAPLView() )
+
+class RAPLView( discord.ui.View ):
+	def __init__( self ):
+		super().__init__()
+		button = discord.ui.Button( label = "YouTube" , style = discord.ButtonStyle.link , url = "https://youtu.be/6vE-whL1ASY" )
+		self.add_item( button )
 
 class ContributeView( discord.ui.View ):
 	def __init__( self ):
