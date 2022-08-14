@@ -57,6 +57,9 @@ async def on_message( message ):
 		await message.add_reaction(emoji)
 	if "rapl" in message.content.lower():
 		await message.reply( "Hey there! I see you've mentioned \"RAPL\", a mnemonic to remember that Right Adjoints Preserve Limits.  Here is a better way of remembering this fact, courtesy of Jarod Alper." , view = RAPLView() )
+	if "shawarma" in message.content.lower() and "king" in message.content.lower():
+		image = discord.File( open( "assets/kingshawarma.png" , "rb" ) )
+		await message.reply( file = image )
 
 class RAPLView( discord.ui.View ):
 	def __init__( self ):
