@@ -38,6 +38,7 @@ USER_IDS = {
 @bot.event
 async def on_ready():
 	birthday.start()
+	check_for_birthdays.start()
 	print( f'We have logged in as {bot.user}' )
 
 @bot.event
@@ -169,7 +170,7 @@ async def birthday():
 		row["userid"] for row in spreadsheet.worksheet("Birthdays").get_all_records()
 		if row["month"] == today_month and row["day"] == today_day
 	]
-	is_alberts_birthday = not ( today_month == 5 and today_day == 27 )
+	is_alberts_birthday = not ( today_month == 5 and today_day == 27 ) # lol
 	if is_alberts_birthday:
 		if len(birthday_people) == 0:
 			pass
@@ -186,5 +187,28 @@ async def birthday():
 		else:
 			all_mentions = [f'<@{person}>' for person in birthday_people]
 			await channel.send("Happy Birthday " + ', '.join(all_mentions[:-1]) + ", and " + all_mentions[-1] + "!")
+			
+@tasks.loop( time = time( 16 , 0 , tzinfo = timezone.utc ) ) # 8/9am
+async def check_for_birthdays(): # check for birthdays in the upcoming week, sorry for the code duplication
+	today = datetime.date.today()
+	if today.weekday() == 0 : # only run on monday mornings
+		channel = discord.utils.get(bot.get_all_channels(), name="general")
+		days_in_advance = 8 # so birthdays get at least one week of heads up
+		next_dates = [today + datetime.timedelta(days = i) for i in range(days_in_advance)]
+		next_dates_no_year = [(d.month, d.day) for d in next_dates]
+
+		sheet = spreadsheet.worksheet("Birthdays")
+		all_bdays = sheet.get_all_records()
+		upcoming_bdays = {
+			row['userid'] : str(row['month']) + "/" + str(row['day'])
+			for row in all_bdays if (row['month'], row['day']) in next_dates_no_year
+		}
+		if not upcoming_bdays:
+			pass
+		else:
+			resp = "Birthdays in the next week:\n"
+			for userid in upcoming_bdays:
+				resp += f'<@{userid}> - {upcoming_bdays[userid]}\n'
+			await channel.send(resp)
 
 bot.run( os.getenv( "API_KEY" ) )
