@@ -155,12 +155,14 @@ async def upcoming_bdays(ctx):
 		row['userid'] : str(row['month']) + "/" + str(row['day'])
 		for row in all_bdays if (row['month'], row['day']) in next_dates_no_year
 	}
+	blurb = "\nDon\'t see your birthday? Use `/setbirthday` to tell us your birthday!"
 	if not upcoming_bdays:
-		await ctx.respond(f'No birthdays in the next week :/')
+		await ctx.respond(f'No birthdays in the next week :/\n' + blurb)
 	else:
 		resp = "Birthdays in the next week:\n"
 		for userid in upcoming_bdays:
 			resp += f'<@{userid}> - {upcoming_bdays[userid]}\n'
+		resp += blurb
 		await ctx.respond(resp)
 
 @bot.slash_command(name = "kill", description = "Express your bloodlust.")
@@ -238,12 +240,14 @@ async def check_for_birthdays(): # check for birthdays in the upcoming week, sor
 			row['userid'] : str(row['month']) + "/" + str(row['day'])
 			for row in all_bdays if (row['month'], row['day']) in next_dates_no_year
 		}
+		blurb = "\nDon\'t see your birthday? Use `/setbirthday` to tell us your birthday!"
 		if not upcoming_bdays:
-			pass
+			await channel.send(f'No birthdays in the next week :/\n' + blurb )
 		else:
 			resp = "Birthdays in the next week:\n"
 			for userid in upcoming_bdays:
 				resp += f'<@{userid}> - {upcoming_bdays[userid]}\n'
+			resp += blurb
 			await channel.send(resp)
 
 bot.run( os.getenv( "API_KEY" ) )
