@@ -165,7 +165,35 @@ async def upcoming_bdays(ctx):
 
 @bot.slash_command(name = "kill", description = "Express your bloodlust.")
 async def kill(ctx, *, target: discord.Member):
+	sheet = spreadsheet.worksheet( "Voting" )
+	cur_cell = sheet.find(ctx.author.name, in_column=1)
+	if cur_cell == None:
+		sheet.append_row([ctx.author.name, str(ctx.author.id), target.name, str(target.id)])
+	else:
+		sheet.update_cell(cur_cell.row, 2, str(ctx.author.id))
+		sheet.update_cell(cur_cell.row, 3, target.name )
+		sheet.update_cell(cur_cell.row, 4, str(target.id) )
 	await ctx.respond(f'{ctx.author.mention} voted to kill {target.mention}')
+
+@bot.slash_command( name = "votes" ,  description = "Examine our democracy." )
+async def votes( ctx ):
+	votecount = {}
+	for row in spreadsheet.worksheet( "Voting" ).get_all_records():
+		if row[ "targetid" ] not in votecount:
+			votecount[ row[ "targetid" ] ] = []
+		votecount[ row[ "targetid" ] ].append( row[ "userid" ] )
+	reply = "**Vote Count:**\n"
+	# need to sort this ugh
+	votelist = []
+	for x in votecount:
+		votelist.append( ( len( votecount[ x ] ) , x , sorted( votecount[ x ] ) ) )
+	votelist.sort( reverse = True )
+	for obj in votelist:
+		target = obj[ 1 ]
+		voters = ", ".join( f'<@{voter}>' for voter in obj[ 2 ]  )
+		reply += f"({obj[ 0 ]}) <@{target}> (Voters: "
+		reply += voters + ")\n"
+	await ctx.respond( reply )
 
 @tasks.loop( time = time( 8 , 0 , tzinfo = timezone.utc ) )
 async def birthday():
