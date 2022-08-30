@@ -163,6 +163,10 @@ async def upcoming_bdays(ctx):
 			resp += f'<@{userid}> - {upcoming_bdays[userid]}\n'
 		await ctx.respond(resp)
 
+@bot.slash_command(name = "kill", description = "Express your bloodlust.")
+async def kill(ctx, *, target: discord.Member):
+	await ctx.respond(f'{ctx.author.mention} voted to kill {target.mention}')
+
 @tasks.loop( time = time( 8 , 0 , tzinfo = timezone.utc ) )
 async def birthday():
 	channel = discord.utils.get(bot.get_all_channels(), name="general")
@@ -190,7 +194,7 @@ async def birthday():
 		else:
 			all_mentions = [f'<@{person}>' for person in birthday_people]
 			await channel.send("Happy Birthday " + ', '.join(all_mentions[:-1]) + ", and " + all_mentions[-1] + "!")
-			
+
 @tasks.loop( time = time( 16 , 0 , tzinfo = timezone.utc ) ) # 8/9am
 async def check_for_birthdays(): # check for birthdays in the upcoming week, sorry for the code duplication
 	today = datetime.date.today()
