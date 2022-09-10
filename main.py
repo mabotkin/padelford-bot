@@ -195,7 +195,8 @@ async def votes( ctx ):
 		voters = ", ".join( f'<@{voter}>' for voter in obj[ 2 ]  )
 		reply += f"({obj[ 0 ]}) <@{target}> (Voters: "
 		reply += voters + ")\n"
-	await ctx.respond( reply )
+
+	await ctx.respond(reply, allowed_mentions = discord.AllowedMentions(users = [], replied_user=False))
 
 @tasks.loop( time = time( 8 , 0 , tzinfo = timezone.utc ) )
 async def birthday():
